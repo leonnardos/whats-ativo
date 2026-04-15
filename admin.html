@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - WhatsApp Interior Poker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #dfdfdf;
+            color: #111;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ── Header ── */
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .admin-header h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #000;
+        }
+
+        .admin-header h1 i { color: #00b87c; }
+
+        .admin-header .link-publico {
+            font-size: 0.78rem;
+            color: #00b87c;
+            text-decoration: none;
+            border: 1px solid rgba(0,184,124,0.3);
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-weight: 600;
+            background: #fff;
+        }
+
+        .admin-header .link-publico:hover {
+            background: rgba(0,184,124,0.1);
+        }
+
+        /* ── Toast Notification ── */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-left: 4px solid #00b87c;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show { transform: translateX(0); }
+        .toast.error { border-left-color: #ff6b6b; }
+
+        /* ── Cards dos Números ── */
+        .numero-card {
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+
+        .numero-card:hover {
+            border-color: rgba(0,0,0,0.2);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+
+        .numero-card.is-principal {
+            border: 1px solid #00b87c;
+            border-top: 5px solid #00b87c;
+            background: #fff;
+        }
+
+        .numero-card.is-inativo {
+            opacity: 0.6;
+            background: #f4f4f4;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title .icon-circle {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: #e6f7ec;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00b87c;
+            font-size: 1rem;
+        }
+        
+        .numero-card.is-inativo .icon-circle {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .card-title .title-text h3 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #000;
+        }
+
+        .card-title .title-text span {
+            font-size: 0.72rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .badge-principal {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #00b87c;
+            background: #e6f7ec;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        /* ── Form Inputs ── */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            background: #f8f8f8;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: #111;
+            font-size: 0.88rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: #00b87c;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 184, 124, 0.15);
+        }
+
+        /* ── Toggle Switch ── */
+        .card-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-item span {
+            font-size: 0.82rem;
+            color: #333;
+            font-weight: 700;
+        }
+
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle .slider {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #d1d1d1;
+            border-radius: 24px;
+            transition: 0.3s;
+        }
+
+        .toggle .slider::before {
+            content: '';
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .toggle input:checked + .slider {
+            background: #00b87c;
+        }
+
+        .toggle input:checked + .slider::before {
+            transform: translateX(20px);
+        }
+
+        .toggle.principal-toggle input:checked + .slider {
+            background: #D4AF37;
+        }
+
+        /* ── Save/Delete Buttons ── */
+        .btn-save {
+            background: #00b87c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-save:hover { transform: translateY(-1px); background: #00a06b; box-shadow: 0 4px 15px rgba(0,184,124,0.3); }
+        .btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .btn-delete {
+            background: #fff0f0;
+            border: 1px solid #ffcdcd;
+            color: #ff6b6b;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .btn-delete:hover { background: #ffebeb; }
+
+        /* ── Add Number ── */
+        .btn-add {
+            width: 100%;
+            background: #fff;
+            border: 2px dashed #ccc;
+            color: #666;
+            padding: 20px;
+            border-radius: 16px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .btn-add:hover {
+            border-color: #00b87c;
+            color: #00b87c;
+            background: #e6f7ec;
+        }
+
+        /* ── Loading ── */
+        .loading-admin {
+            text-align: center;
+            padding: 60px 0;
+            color: #888;
+            font-weight: 600;
+        }
+
+        .loading-admin .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #00b87c;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 14px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            .form-row { grid-template-columns: 1fr; }
+            .card-actions { flex-direction: column; align-items: stretch; }
+            .toggle-group { justify-content: space-between; }
+            .btn-save { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1><i class="fab fa-whatsapp"></i> Gerenciar Números</h1>
+        <a href="index.html" class="link-publico" target="_blank">
+            <i class="fas fa-external-link-alt"></i> Ver página pública
+        </a>
+    </div>
+
+    <div id="numeros-list">
+        <div class="loading-admin">
+            <div class="spinner"></div>
+            Carregando números...
+        </div>
+    </div>
+
+    <button class="btn-add" onclick="adicionarNumero()">
+        <i class="fas fa-plus"></i> Adicionar Novo Número
+    </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const SUPABASE_URL = 'https://vqvrgpyktfjdqtbnkkfy.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxdnJncHlrdGZqZHF0Ym5ra2Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODUxNzgsImV4cCI6MjA5MDQ2MTE3OH0.7V1_FcIPSyM8GhtdWWdWchn1qGPANgJrxjuDjQQCPQI';
+
+    const headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+    };
+
+    let numeros = [];
+
+    // ── Toast ──
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = isError ? 'toast error show' : 'toast show';
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ── Carregar ──
+    async function carregarNumeros() {
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/whatsapp_numeros?order=ordem.asc`, { headers });
+            numeros = await res.json();
+            renderizar();
+        } catch (err) {
+            showToast('Erro ao carregar números', true);
+        }
+    }
+
+    // ── Renderizar ──
+    function renderizar() {
+        const container = document.getElementById('numeros-list');
+        container.innerHTML = '';
+
+        numeros.forEach(n => {
+            const card = document.createElement('div');
+            card.className = `numero-card${n.principal ? ' is-principal' : ''}${!n.ativo ? ' is-inativo' : ''}`;
+            card.id = `card-${n.id}`;
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="icon-circle">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <div class="title-text">
+                            <h3>${n.label}</h3>
+                            <span>#${n.id} · Ordem ${n.ordem}</span>
+                        </div>
+                    </div>
+                    ${n.principal ? '<span class="badge-principal">★ Principal</span>' : ''}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group full">
+                        <label>Nome / Label</label>
+                        <input type="text" id="label-${n.id}" value="${n.label}" placeholder="Ex: Suporte Principal">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Telefone (exibição)</label>
+                        <input type="text" id="telefone-${n.id}" value="${n.telefone}" placeholder="(19) 9 9999-9999">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone (link wa.me)</label>
+                        <input type="text" id="link-${n.id}" value="${n.telefone_link}" placeholder="5519999999999">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ordem</label>
+                        <input type="number" id="ordem-${n.id}" value="${n.ordem}" min="1" max="99">
+                    </div>
+                </div>
+
+                <div class="card-actions">
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <span>Ativo</span>
+                            <label class="toggle">
+                                <input type="checkbox" id="ativo-${n.id}" ${n.ativo ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-item">
+                            <span>Principal</span>
+                            <label class="toggle principal-toggle">
+                                <input type="checkbox" id="principal-${n.id}" ${n.principal ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn-delete" onclick="deletarNumero(${n.id})">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <button class="btn-save" onclick="salvarNumero(${n.id})" id="btn-save-${n.id}">
+                            <i class="fas fa-check"></i> Salvar
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
+    }
+
+    // ── Salvar ──
+    async function salvarNumero(id) {
+        const btn = document.getElementById(`btn-save-${id}`);
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
+        const data = {
+            label: document.getElementById(`label-${id}`).value,
+            telefone: document.getElementById(`telefone-${id}`).value,
+            telefone_link: document.getElementById(`link-${id}`).value,
+            ativo: document.getElementById(`ativo-${id}`).checked,
+            principal: document.getElementById(`principal-${id}`).checked,
+            ordem: parseInt(document.getElementById(`ordem-${id}`).value) || 0,
+            updated_at: new Date().toISOString()
+        };
+
+        // Se marcou como principal, desmarca os outros
+        if (data.principal) {
+            await fetch(`${SUPABASE_URL}/rest/v1/whatsapp_numeros?id=neq.${id}`, {
+                method: 'PATCH',
+                headers,
+                body: JSON.stringify({ principal: false })
+            });
+        }
+
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/whatsapp_numeros?id=eq.${id}`, {
+                method: 'PATCH',
+                headers,
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                showToast('✅ Número atualizado com sucesso!');
+                await carregarNumeros();
+            } else {
+                throw new Error('Falha ao salvar');
+            }
+        } catch (err) {
+            showToast('❌ Erro ao salvar', true);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check"></i> Salvar';
+        }
+    }
+
+    // ── Deletar ──
+    async function deletarNumero(id) {
+        if (!confirm('Tem certeza que deseja excluir este número?')) return;
+
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/whatsapp_numeros?id=eq.${id}`, {
+                method: 'DELETE',
+                headers
+            });
+
+            if (res.ok) {
+                showToast('🗑️ Número excluído');
+                await carregarNumeros();
+            } else {
+                throw new Error('Falha');
+            }
+        } catch (err) {
+            showToast('❌ Erro ao excluir', true);
+        }
+    }
+
+    // ── Adicionar ──
+    async function adicionarNumero() {
+        const maxOrdem = numeros.length > 0 ? Math.max(...numeros.map(n => n.ordem)) : 0;
+
+        const data = {
+            label: 'Novo Número',
+            telefone: '(00) 0 0000-0000',
+            telefone_link: '5500000000000',
+            ativo: false,
+            principal: false,
+            ordem: maxOrdem + 1
+        };
+
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/whatsapp_numeros`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                showToast('✅ Número adicionado! Edite os dados abaixo.');
+                await carregarNumeros();
+                // Scroll até o final
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            } else {
+                throw new Error('Falha');
+            }
+        } catch (err) {
+            showToast('❌ Erro ao adicionar', true);
+        }
+    }
+
+    // ── Init ──
+    carregarNumeros();
+</script>
+
+</body>
+</html>
