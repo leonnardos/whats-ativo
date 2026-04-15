@@ -420,6 +420,15 @@
         try {
             const res = await fetch(`${SUPABASE_URL}/rest/v1/whatsapp_numeros?order=ordem.asc`, { headers });
             numeros = await res.json();
+            
+            numeros.sort((a, b) => {
+                if (a.principal && !b.principal) return -1;
+                if (!a.principal && b.principal) return 1;
+                if (a.ativo && !b.ativo) return -1;
+                if (!a.ativo && b.ativo) return 1;
+                return a.ordem - b.ordem;
+            });
+
             renderizar();
         } catch (err) {
             showToast('Erro ao carregar números', true);

@@ -238,7 +238,16 @@
                     'Authorization': `Bearer ${SUPABASE_KEY}`
                 }
             });
-            const numeros = await res.json();
+            let numeros = await res.json();
+            
+            numeros.sort((a, b) => {
+                if (a.principal && !b.principal) return -1;
+                if (!a.principal && b.principal) return 1;
+                if (a.ativo && !b.ativo) return -1;
+                if (!a.ativo && b.ativo) return 1;
+                return a.ordem - b.ordem;
+            });
+
             renderizar(numeros);
         } catch (err) {
             document.getElementById('numeros-container').innerHTML =
